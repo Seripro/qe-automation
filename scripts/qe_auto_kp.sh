@@ -64,58 +64,18 @@ sed -i '/K_POINTS automatic/{N;d;}' band.in
 echo "xcrysden前の計算おわり"
 
 # ==========================================
-# 1. ディレクトリとファイルの準備
+# 1.5. K点パスの自動生成 (SeeK-path)
 # ==========================================
+echo "Generating k-point path using SeeK-path..."
 
-# ==========================================
-# 1.5. K点パスの動的・自動生成
-# ==========================================
-# pwscf.in から ibrav の数値を抽出
-IBRAV=$(grep -i 'ibrav' pwscf.in | awk -F'=' '{print $2}' | tr -d ' ,')
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "${SCRIPT_DIR}/generate_kpath.py" pwscf.in 20
 
-echo "Detected ibrav = ${IBRAV}. Generating k-point path automatically..."
-
-case "$IBRAV" in
-    1) # Simple Cubic (単純立方格子)
-        cat << 'EOF' > kp.pwscf
-K_POINTS {crystal_b}
-4
-0.0 0.0 0.0  20 ! Gamma
-0.5 0.0 0.0  20 ! X
-0.5 0.5 0.0  20 ! M
-0.0 0.0 0.0  20 ! Gamma
-EOF
-        ;;
-    2) # Face-Centered Cubic (面心立方格子 : Si, Alなど)
-        cat << 'EOF' > kp.pwscf
-K_POINTS {crystal_b}
-5
-0.0 0.0 0.0  20 ! Gamma
-0.5 0.0 0.5  20 ! X
-0.5 0.25 0.75 20 ! W
-0.5 0.5 0.5  20 ! L
-0.0 0.0 0.0  20 ! Gamma
-EOF
-        ;;
-    4) # Hexagonal (六方晶系 : Znなど)
-        cat << 'EOF' > kp.pwscf
-K_POINTS {crystal_b}
-6
-0.0  0.0  0.0  20 ! Gamma
-0.5  0.0  0.0  20 ! M
-0.333333 0.333333 0.0  20 ! K
-0.0  0.0  0.0  20 ! Gamma
-0.0  0.0  0.5  20 ! A
-0.5  0.0  0.5  20 ! L
-EOF
-        ;;
-    *)
-        # 登録されていない結晶構造の場合はエラーを出す
-        echo "Error: Automating k-path for ibrav=${IBRAV} is not supported yet in this script."
-        echo "Please add it to the script or prepare kp.pwscf manually."
-        exit 1
-        ;;
-esac
+if [ $? -ne 0 ] || [ ! -f kp.pwscf ]; then
+    echo "Error: Failed to generate k-point path with SeeK-path." >&2
+    echo "Make sure 'seekpath' and 'numpy' are installed: pip install seekpath numpy" >&2
+    exit 1
+fi
 
 cat kp.pwscf >> band.in
 
