@@ -191,6 +191,7 @@ echo "PDOS calculation finished!"
 # ==========================================
 # 6. PDOSの集計とプロット (自動軌道抽出)
 # ==========================================
+export LD_LIBRARY_PATH="/opt/intel/oneapi/mkl/2021.3.0/lib/intel64:$LD_LIBRARY_PATH"
 echo "Processing PDOS files dynamically..."
 PLOT_CMD="plot 'aiida.pdos_tot' u (\$1-Ef):2 w l lc rgb 'black' title 'Total'"
 ELEMENTS=$(ls aiida.pdos_atm* 2>/dev/null | sed -n 's/.*(\([A-Za-z]*\))_wfc.*/\1/p' | sort -u)
