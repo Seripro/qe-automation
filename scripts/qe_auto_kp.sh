@@ -154,8 +154,6 @@ cat << 'EOF' > pdos.in
 &PROJWFC
   outdir = "./out/"
   prefix = "aiida"
-    emin = 0
-    emax = 15
   deltae = 0.02
 /
 EOF
