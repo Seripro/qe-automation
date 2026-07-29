@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # ==========================================
 # 1. ディレクトリとファイルの準備
 # ==========================================
@@ -68,7 +70,6 @@ echo "xcrysden前の計算おわり"
 # ==========================================
 echo "Generating k-point path using SeeK-path..."
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python3 "${SCRIPT_DIR}/generate_kpath.py" pwscf.in 20
 
 if [ $? -ne 0 ] || [ ! -f kp.pwscf ]; then
