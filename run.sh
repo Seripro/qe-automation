@@ -1,0 +1,1 @@
+nohup bash ./scripts/qe_auto_kp.sh > run.log 2>&1 &
