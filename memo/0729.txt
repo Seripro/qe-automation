@@ -22,3 +22,18 @@ pw.x の計算が libmkl_scalapack_lp64.so.1: cannot open shared object file と
 • エラーの原因究明 • tail -n 20 scf.out : 出力ファイルの末尾を見て、正常終了（JOB DONE）かエラーか確認する。 • cat scf.sh.e* : PBS自体が出力したエラーログを確認する。
 • ライブラリ（.soファイル）が見つからないと言われたら • ldd /パス/pw.x : プログラムが「どの場所の、どのバージョンのライブラリ」を要求しているか（not found になっていないか）を調べる。 • find /opt -name "ファイル名" 2>/dev/null : サーバー全体のどこにそのファイルが隠れているか強引に探し出す。
 このまとめをメモ帳などに残しておけば、次に新しいサーバーを使ったり、別のプログラム（VASPやLAMMPSなど）で同様のエラーに遭遇したりした際にも、真っ先に原因を特定できるはずです。
+
+  ユーザーがやること：
+  1. DIR_NAME="Na" を物質名に変える
+  2. ZIPファイルを ~/Downloads/PWscf.zip に置く（または引数で指定）
+
+  それだけで自動的に行われること：
+  - SCF計算
+  - K点パスの自動決定（SeeK-path）
+  - バンド計算 → bands.png
+  - PDOS計算 → pdos.png
+
+  ただし前提条件（サーバー管理者が一度だけ整えるもの）：
+  - Quantum Espresso がインストール済み
+  - pip install seekpath numpy 済み
+  - PBSキュー名（S24hdd）やノード数（24）がそのサーバーに合っている
