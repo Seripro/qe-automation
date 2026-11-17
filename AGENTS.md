@@ -60,6 +60,7 @@
 - GUIはSCF → バンド構造 → NSCF/PDOSを逐次実行し、バンド図とPDOS図を表示する。
 - CIFからの完全なQE入力生成、詳細なパラメータ編集、手動k点パス編集、フェルミ面可視化は初期MVPの範囲外とする。
 - 詳細は `docs/gui-workflow-spec.md` と `docs/decisions/0001-include-pdos-in-mvp.md` を正とする。
+- シリコンの初回検証は、Materials Cloudで生成した `docs/experiments/silicon/input/PWscf.zip` を変更せずに使う。詳細は `docs/decisions/0003-use-materials-cloud-zip-as-silicon-baseline.md` を正とする。
 
 ## 実装・検証の原則
 

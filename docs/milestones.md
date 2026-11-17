@@ -8,8 +8,8 @@
 
 ## 1. シリコン計算を理解・再現する
 
-- シリコンのCIFからQE input generatorで `PWscf.zip` を作成する。
-- ZIPに含まれる `pwscf.in` の条件を確認し、擬ポテンシャルと収束条件を検証する。
+- Materials Cloudで生成した `PWscf.zip` を基準入力として保存する。
+- ZIPに含まれる `pwscf.in` の条件を確認し、変更せずにSCF → バンド → PDOSを再現する。
 - 入力の各項目と、SCF・バンド・PDOSの役割を説明できるようにする。
 - CLIでSCF → バンド → PDOSを実行し、実験記録に残す。
 
