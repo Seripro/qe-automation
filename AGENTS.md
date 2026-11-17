@@ -50,6 +50,7 @@
 - `docs/tutorials/`: 研究室チュートリアルなど、再現可能な手順
 - `docs/requirements.md`: 機能要件、非機能要件、MVP範囲、未決定事項
 - `docs/gui-workflow-spec.md`: チュートリアルに対応するGUIの処理・画面フロー案
+- `docs/milestones.md`: MVPまでの作業段階と各段階の完了条件
 
 判断がまだ相談前なら、文書の状態を「提案中」または「保留」とする。採用・却下した理由と、再検討条件を残す。
 

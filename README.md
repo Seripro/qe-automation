@@ -12,12 +12,13 @@ Quantum ESPRESSO（QE）をWebブラウザから操作し、第一原理計算�
 - `docs/templates/`: 各記録のテンプレート。
 - `docs/tutorials/`: 研究室チュートリアルを整理した実行手順。
 - `docs/gui-workflow-spec.md`: チュートリアルを基にしたGUIのMVP仕様案。
+- `docs/milestones.md`: MVPまでの作業段階と完了条件。
 - `docs/requirements.md`: GUIの機能要件と未決定事項の整理。
 - `scripts/`: 既存のQE自動計算スクリプト。
 - `webapp/`: Webアプリケーションの要件および今後の実装。
 - `memo/`: 整理前の過去メモ。
 
-最初に読む資料は、[学習ロードマップ](docs/physics/00-learning-roadmap.md)、[第一原理計算とDFT](docs/physics/01-first-principles-and-dft.md)、[QEバンド構造・PDOS計算チュートリアル](docs/tutorials/tutorial-qe-band.md)、[GUIワークフロー仕様案](docs/gui-workflow-spec.md)、[要件の整理](docs/requirements.md) です。
+最初に読む資料は、[マイルストーン](docs/milestones.md)、[学習ロードマップ](docs/physics/00-learning-roadmap.md)、[第一原理計算とDFT](docs/physics/01-first-principles-and-dft.md)、[QEバンド構造・PDOS計算チュートリアル](docs/tutorials/tutorial-qe-band.md)、[GUIワークフロー仕様案](docs/gui-workflow-spec.md)、[要件の整理](docs/requirements.md) です。
 
 ## 記録時の約束
 
