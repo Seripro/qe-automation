@@ -31,33 +31,41 @@ make pw pp
 - `sumpdos.x`: 原子・軌道ごとのPDOSを集計する
 - `fermi_velocity.x`: フェルミ面可視化に用いるデータを生成する
 
-## 2. 構造データを探す
+## 2. 構造データを取得し、QE入力一式を作る
 
-結晶構造ファイル（CIF）は、Crystallography Open Database（COD）などから取得する。
+このチュートリアルでは、MgB₂のCIFをCODから取得し、Materials CloudのQE input generatorでQE入力一式を作成する。
 
-- COD: <http://www.crystallography.net/cod/search.html>
-- 例: chemical formula (in Hill notation) に `B2 Mg` を入力して検索する。
-
-取得したCIFはVESTAで確認できる。
+1. [Crystallography Open Database（COD）](http://www.crystallography.net/cod/search.html) を開く。
+2. `chemical formula (in Hill notation)` に `B2 Mg` を入力し、`send` を押す。
+3. `1000026` 番のCIFファイルをダウンロードして保存する。
+4. 必要に応じてVESTAで構造を確認する。
 
 ```bash
 /home/app/VESTA-gtk2/VESTA ~/Downloads/1000026.cif
 ```
 
-QE入力ファイルの作成やCIFのサーバーへの転送は、この元チュートリアルではブラウザや `scp` で行う。
+次に、[QE input generator (Materials Cloud)](https://qeinputgenerator.materialscloud.io/) を開く。
+
+1. ダウンロードしたCIFファイルを選択する。
+2. `parser` を `CIF file (pymatgen)` に変更する。
+3. 実行する。
+4. 生成された `PWscf.zip` をダウンロードする。
+
+この `PWscf.zip` が、SCF計算の入力である `pwscf.in` と必要なファイルを含む入力一式となる。
+
+> **注意:** input generatorで選択した擬ポテンシャル、カットオフ、k点などは計算条件である。ZIPを取得できたことだけで、物理的に十分な精度の条件であるとは限らない。使用した条件は実験記録に残し、必要に応じて収束試験を行う。
 
 ## 3. 計算入力一式をサーバーへ配置する
 
-`PWscf.zip` をサーバーに転送し、物質ごとの作業ディレクトリで展開する。ZIPには少なくとも `pwscf.in` が含まれることを想定する。
+Materials Cloudからダウンロードした `PWscf.zip` を計算サーバーに転送し、物質ごとの作業ディレクトリで展開する。
 
 ```bash
-# ローカルPCからの例
+# ローカルPCから計算サーバーへ送る例
 scp /mnt/c/Users/kawam/Downloads/PWscf.zip nordstrom:~/
 
-# サーバー上での例
-scp ~/Downloads/PWscf.zip nordstrom:~/
+# サーバー上で展開する例
 mkdir -p ~/work/MgB2/
-mv ~/Downloads/PWscf.zip ~/work/MgB2/
+mv ~/PWscf.zip ~/work/MgB2/
 cd ~/work/MgB2/
 unzip PWscf.zip
 cd PWscf/
