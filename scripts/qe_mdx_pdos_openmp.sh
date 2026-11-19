@@ -6,6 +6,8 @@
 set -euo pipefail
 shopt -s nullglob
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 if [[ $# -ne 1 ]]; then
     echo "Usage: $0 <SCF run directory>" >&2
     echo "Example: $0 \"$HOME/work/Si-scf-2026-11-19-run1\"" >&2
@@ -143,7 +145,6 @@ if (( ${#component_arguments[@]} == 0 )); then
     exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python3 "${SCRIPT_DIR}/plot_pdos.py" aiida.pdos_tot \
     --fermi "${FERMI_ENERGY}" \
     "${component_arguments[@]}" \
