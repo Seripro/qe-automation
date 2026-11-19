@@ -32,6 +32,9 @@ if [[ ! -x "${QE_BIN_DIR}/pw.x" ]]; then
     exit 2
 fi
 
+QE_SOURCE_DIR="$(cd "${QE_BIN_DIR}/.." && pwd)"
+QE_SOURCE_REVISION="$(git -C "${QE_SOURCE_DIR}" describe --tags --always --dirty 2>/dev/null || echo unknown)"
+
 if ! command -v unzip >/dev/null 2>&1; then
     echo "Error: unzip command was not found. Install the 'unzip' package first." >&2
     exit 2
@@ -74,7 +77,7 @@ fi
     echo "hostname=$(hostname)"
     echo "input_zip_sha256=$(sha256sum "${WORK_DIR}/PWscf.zip" | awk '{print $1}')"
     echo "qe_executable=${QE_BIN_DIR}/pw.x"
-    echo "qe_version=$(${QE_BIN_DIR}/pw.x -version 2>&1 | head -n 1 || true)"
+    echo "qe_source_revision=${QE_SOURCE_REVISION}"
     echo "omp_num_threads=${OMP_NUM_THREADS}"
 } > "${WORK_DIR}/run-metadata.txt"
 
