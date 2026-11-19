@@ -35,6 +35,11 @@ ATOMIC_NUMBERS = {
 }
 
 
+def display_label(label):
+    """SeeK-pathの内部名をバンド図で使う慣例表記へ変換する。"""
+    return 'Γ' if label == 'GAMMA' else label
+
+
 def parse_pwscf_input(filename):
     """pwscf.in を解析して cell, positions, numbers を返す"""
     with open(filename, 'r') as f:
@@ -211,11 +216,11 @@ def generate_kp_pwscf(result, npoints=20):
     for i, (start, end) in enumerate(path):
         if i == 0:
             coord = point_coords[start]
-            label = start.replace('GAMMA', 'Gamma')
+            label = display_label(start)
             kpoints.append((coord, npoints, label))
 
         coord = point_coords[end]
-        label = end.replace('GAMMA', 'Gamma')
+        label = display_label(end)
         # セグメントの最後の点: 次のセグメントの始点と一致する場合は npoints
         # パスの最終点は 0（または npoints）
         if i < len(path) - 1:
@@ -227,7 +232,7 @@ def generate_kp_pwscf(result, npoints=20):
                 kpoints.append((coord, 0, label))
                 # 次の始点を追加
                 next_coord = point_coords[next_start]
-                next_label = next_start.replace('GAMMA', 'Gamma')
+                next_label = display_label(next_start)
                 kpoints.append((next_coord, npoints, next_label))
         else:
             kpoints.append((coord, 0, label))

@@ -47,6 +47,8 @@ def read_kpath(path: Path) -> list[tuple[str, int]]:
         if len(fields) < 4:
             raise ValueError(f"Unexpected k-point line in {path}: {line!r}")
         label = comment.strip() or "?"
+        if label in {"Gamma", "GAMMA"}:
+            label = "Γ"
         points.append((label, int(fields[3])))
     return points
 
