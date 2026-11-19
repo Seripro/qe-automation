@@ -32,6 +32,11 @@ if [[ ! -x "${QE_BIN_DIR}/pw.x" ]]; then
     exit 2
 fi
 
+if ! command -v unzip >/dev/null 2>&1; then
+    echo "Error: unzip command was not found. Install the 'unzip' package first." >&2
+    exit 2
+fi
+
 if [[ -e "${WORK_DIR}" ]]; then
     echo "Error: work directory already exists: ${WORK_DIR}" >&2
     echo "Use a different RUN_NAME or WORK_DIR; do not overwrite a previous run." >&2
