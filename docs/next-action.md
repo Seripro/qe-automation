@@ -6,23 +6,21 @@
 
 ## 現在地
 
-- フェーズ: シリコンを用いた初回の計算フロー検証（SCF完了）
+- フェーズ: シリコンを用いた初回の計算フロー検証（バンドデータ生成完了）
 - 基準入力: `docs/experiments/silicon/input/PWscf.zip`
 - 入力方針: 初回の SCF → バンド構造 → NSCF/PDOS 計算では、基準入力ZIPを変更しない（[ADR-0003](decisions/0003-use-materials-cloud-zip-as-silicon-baseline.md)）。
-- 直近の確認: 基準入力ZIPを変更せずにSCFを実行し、収束・`JOB DONE.`・`out/aiida.save/` を確認した。詳細は [2026-11-19-scf.md](experiments/silicon/2026-11-19-scf.md)。
+- 直近の確認: SCF出力を用いたバンド計算が正常終了し、SeeK-pathのk点経路と `bands.out.gnu` を得た。詳細は [2026-11-19-band.md](experiments/silicon/2026-11-19-band.md)。
 
 ## 次の具体的な作業
 
-### 1. バンド構造計算を実行する
+### 1. バンド図を生成して確認する
 
-目的は、SCF出力を用いて高対称k点経路上の電子状態を計算し、バンド図を得ること。
+目的は、生成済みのバンドデータをフェルミ準位基準で可視化し、次のPDOS計算へ進める状態を確認すること。
 
-1. 既存の `qe1.sh` / `qe2.sh` のバンド構造処理を確認する。
-2. `mdx-server` 用にPBS・MPI依存を除いたバンド構造実行スクリプトを作成する。
-3. `band.in` と高対称k点パスを生成する。
-4. `pw.x` と `bands.x` を実行し、`band.out`、`bands.out.gnu` を確認する。
-5. `scf.out` のフェルミ準位 `6.4775 eV` を用いてバンド図を作成する。
-6. 成功・失敗を問わず、実験記録を更新する。
+1. `gnuplot` またはPythonの描画環境を用意する。
+2. `bands.out.gnu` の各エネルギーからフェルミ準位 `6.4775 eV` を引いて描画する。
+3. `bands.png` を保存し、価電子帯・伝導帯・ギャップらしき領域を確認する。
+4. 成功・失敗を問わず、実験記録を更新する。
 
 ## その後の予定
 

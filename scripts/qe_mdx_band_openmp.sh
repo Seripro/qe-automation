@@ -145,8 +145,13 @@ plot "bands.out.gnu" using 1:(\$2-Ef) with lines lc rgb "blue" title "Bands", \\
      0 with lines lc rgb "black" dt 2 title "Fermi level"
 EOF
     echo "Generated band plot: ${CALC_DIR}/bands.png"
+elif python3 -c 'import matplotlib' >/dev/null 2>&1; then
+    python3 "${SCRIPT_DIR}/plot_bands.py" bands.out.gnu \
+        --fermi "${FERMI_ENERGY}" \
+        --output bands.png
+    echo "Generated band plot with Matplotlib: ${CALC_DIR}/bands.png"
 else
-    echo "Warning: gnuplot was not found; bands.out.gnu was generated, but bands.png was skipped." >&2
+    echo "Warning: neither gnuplot nor Python Matplotlib was found; bands.out.gnu was generated, but bands.png was skipped." >&2
 fi
 
 {
