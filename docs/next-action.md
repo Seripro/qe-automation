@@ -6,21 +6,22 @@
 
 ## 現在地
 
-- フェーズ: シリコンを用いた初回の計算フロー検証（バンドデータ生成完了）
+- フェーズ: シリコンを用いた初回の計算フロー検証（バンド図生成完了）
 - 基準入力: `docs/experiments/silicon/input/PWscf.zip`
 - 入力方針: 初回の SCF → バンド構造 → NSCF/PDOS 計算では、基準入力ZIPを変更しない（[ADR-0003](decisions/0003-use-materials-cloud-zip-as-silicon-baseline.md)）。
-- 直近の確認: SCF出力を用いたバンド計算が正常終了し、SeeK-pathのk点経路と `bands.out.gnu` を得た。詳細は [2026-11-19-band.md](experiments/silicon/2026-11-19-band.md)。
+- 直近の確認: SCF出力を用いたバンド計算が正常終了し、SeeK-pathのk点経路、`bands.out.gnu`、フェルミ準位基準の `bands.png` を得た。詳細は [2026-11-19-band.md](experiments/silicon/2026-11-19-band.md)。
 
 ## 次の具体的な作業
 
-### 1. バンド図を生成して確認する
+### 1. NSCF・PDOS計算を実行する
 
-目的は、生成済みのバンドデータをフェルミ準位基準で可視化し、次のPDOS計算へ進める状態を確認すること。
+目的は、SCF結果を用いて状態密度と原子・軌道別の寄与を計算し、PDOS図を得ること。
 
-1. `gnuplot` またはPythonの描画環境を用意する。
-2. `bands.out.gnu` の各エネルギーからフェルミ準位 `6.4775 eV` を引いて描画する。
-3. `bands.png` を保存し、価電子帯・伝導帯・ギャップらしき領域を確認する。
-4. 成功・失敗を問わず、実験記録を更新する。
+1. 既存の `qe2.sh` のNSCF・PDOS処理を確認する。
+2. `mdx-server` 用にPBS・MPI依存を除いたNSCF・PDOS実行スクリプトを作成する。
+3. `nscf.in` と `pdos.in` を生成し、`pw.x` と `projwfc.x` を実行する。
+4. 全DOS・原子／軌道別PDOSデータを確認し、PDOS図を生成する。
+5. 成功・失敗を問わず、実験記録を更新する。
 
 ## その後の予定
 

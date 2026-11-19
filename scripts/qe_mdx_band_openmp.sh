@@ -148,6 +148,7 @@ EOF
 elif python3 -c 'import matplotlib' >/dev/null 2>&1; then
     python3 "${SCRIPT_DIR}/plot_bands.py" bands.out.gnu \
         --fermi "${FERMI_ENERGY}" \
+        --kpath kp.pwscf \
         --output bands.png
     echo "Generated band plot with Matplotlib: ${CALC_DIR}/bands.png"
 else
