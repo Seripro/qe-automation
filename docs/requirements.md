@@ -18,7 +18,7 @@ PDOS計算・表示はMVPの必須範囲とする。採用理由は [ADR-0001](d
 
 ## 現在ある要件草案
 
-より詳細なAPI、WebSocket、PBSジョブ管理、結果表示の草案は [`../webapp/REQUIREMENTS.md`](../webapp/REQUIREMENTS.md) にある。この文書は過去の案であり、採用済みの仕様ではない。
+より詳細なAPI、WebSocket、PBSジョブ管理、結果表示の草案は [`../webapp/REQUIREMENTS.md`](../webapp/REQUIREMENTS.md) にある。この文書は過去の案であり、採用済みの仕様ではない。MVPの実行方式は、PBSではなくmdx-server上のアプリ側待ち行列・ワーカーによる直接実行とする（[ADR-0005](decisions/0005-use-application-queue-on-mdx.md)）。
 
 チュートリアルを基にした、検証済みZIP入力方式の具体的な画面・処理フロー案は [GUIワークフロー仕様案](gui-workflow-spec.md) を参照する。この文書も提案中である。
 
@@ -35,7 +35,7 @@ PDOS計算・表示はMVPの必須範囲とする。採用理由は [ADR-0001](d
 - 対象物質と扱う結晶構造の範囲（最初の検証対象はシリコン。ADR-0002を参照）
 - 計算条件をどこまでユーザーに公開するか
 - 認証・アクセス制御の要件
-- 実行環境とPBS連携の詳細
+- 実行環境、待ち行列、ワーカーの直接実行に関する詳細
 - GUIの有効性をどう評価するか
 
 ## 非機能面で確認が必要なこと
