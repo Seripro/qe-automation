@@ -21,29 +21,20 @@ SCFスクリプトは展開前にZIPを検査する。`PWscf/pwscf.in` を含ま
 
 ## 実行
 
-計算サーバー上で、MgB₂用ZIPへの絶対パスを指定する。`RUN_NAME` を変えることで、過去の実行結果を上書きしない。
+計算サーバー上で、入力ZIPを `~/qe-inputs/MgB2/PWscf.zip` に置く。入力配置と一コマンドCLIの方針は [ADR-0004](../decisions/0004-stage-cli-workflow-before-pbs.md) を参照する。
 
 ```bash
-MATERIAL_LABEL=MgB2 RUN_NAME=MgB2-scf-2026-11-21-run1 \
-  bash scripts/qe_mdx_scf_openmp.sh /absolute/path/to/MgB2-PWscf.zip
+make run MATERIAL=MgB2
 ```
 
-SCFが成功した場合だけ、同じ実行ディレクトリを指定してバンド計算を実行する。
+このコマンドは、固有の実行ディレクトリを作成し、SCFが成功した場合だけバンド計算へ、さらに成功した場合だけNSCF・PDOS計算へ進む。各段階の失敗時には後続を実行せず停止する。
+
+既定では `~/.venvs/qe-tools-v1` を自動的に使うため、実行前に仮想環境を有効化する必要はない。別の仮想環境を使う場合は、有効化してから実行するか、`QE_TOOLS_VENV` を指定する。
+
+デフォルトでは `pwscf.in` の `ATOMIC_SPECIES` にあるMgとBの両方をPDOSへ集計する。Mgだけ、またはBだけを描きたい場合は、互換用の `PDOS_ELEMENT` または複数指定用の `PDOS_ELEMENTS` を指定する。
 
 ```bash
-bash scripts/qe_mdx_band_openmp.sh "$HOME/work/MgB2-scf-2026-11-21-run1"
-```
-
-続いてPDOSを実行する。指定を省略すると、`pwscf.in` の `ATOMIC_SPECIES` にあるMgとBの両方を集計する。
-
-```bash
-bash scripts/qe_mdx_pdos_openmp.sh "$HOME/work/MgB2-scf-2026-11-21-run1"
-```
-
-Mgだけ、またはBだけを描きたい場合は、互換用の `PDOS_ELEMENT` または複数指定用の `PDOS_ELEMENTS` を指定する。
-
-```bash
-PDOS_ELEMENTS=Mg,B bash scripts/qe_mdx_pdos_openmp.sh "$HOME/work/MgB2-scf-2026-11-21-run1"
+PDOS_ELEMENTS=Mg,B make run MATERIAL=MgB2
 ```
 
 ## 成功時の確認
