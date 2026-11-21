@@ -1,2 +1,2 @@
 venv:
-	echo "source ~/.venvs/qe-tools-v1/bin/activate"
+	@printf '%s\n' 'source ~/.venvs/qe-tools-v1/bin/activate' | pbcopy
