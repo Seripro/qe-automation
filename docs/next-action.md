@@ -6,10 +6,11 @@
 
 ## 現在地
 
-- フェーズ: シリコンを用いた初回の計算フロー検証（SCF・バンド・PDOS完了）
+- フェーズ: CLI計算フロー検証（SiとMgB₂でSCF・バンド・PDOS完了）
 - 基準入力: `docs/experiments/silicon/input/PWscf.zip`
 - 入力方針: 初回の SCF → バンド構造 → NSCF/PDOS 計算では、基準入力ZIPを変更しない（[ADR-0003](decisions/0003-use-materials-cloud-zip-as-silicon-baseline.md)）。
 - 直近の確認: NSCF・PDOS計算が正常終了し、全DOS・Si s/p成分の `pdos.png` を得た。詳細は [2026-11-19-pdos.md](experiments/silicon/2026-11-19-pdos.md)。
+- 複数元素の確認: MgB₂でもSCF・バンド・NSCF・PDOSが正常終了し、Mg・BのPDOSを含む図を得た。詳細は [2026-11-21-band-pdos.md](experiments/mgb2/2026-11-21-band-pdos.md)。物理的妥当性は未検証。
 
 ## 次の具体的な作業
 
@@ -19,7 +20,7 @@
 
 1. 入力検証、SCF、バンド準備・計算、PDOS準備・計算、図生成を状態遷移として整理する。
 2. 各段階の入力、成功根拠、失敗時の停止条件、保持すべき成果物を明確にする。
-3. `mdx-server` の直接実行方式と、既存PBS方式を区別して記録する。
+3. ZIPを展開する前の安全性検査と、`mdx-server` の直接実行方式・既存PBS方式の違いを処理仕様へ反映する。
 4. GUIのバックエンド実装範囲を小さく決める。
 
 ## その後の予定
