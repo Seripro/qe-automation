@@ -13,6 +13,7 @@ class Settings:
     cookie_secure: bool
     stage_timeout_seconds: int
     view_token_secret: str
+    qe_tools_venv: Path
 
     @property
     def database_path(self) -> Path:
@@ -33,4 +34,5 @@ def load_settings() -> Settings:
         cookie_secure=os.environ.get("QE_COOKIE_SECURE", "false").lower() == "true",
         stage_timeout_seconds=int(os.environ.get("QE_STAGE_TIMEOUT_SECONDS", 6 * 60 * 60)),
         view_token_secret=os.environ.get("QE_VIEW_TOKEN_SECRET", "development-only-change-me"),
+        qe_tools_venv=Path(os.environ.get("QE_TOOLS_VENV", Path.home() / ".venvs" / "qe-tools-v1")),
     )

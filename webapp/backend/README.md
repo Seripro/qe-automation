@@ -20,6 +20,7 @@ QE_APP_DATA_ROOT=/absolute/path/to/runtime python3 -m app.worker
 
 本番では、APIとワーカーを別サービスとして管理する。`QE_COOKIE_SECURE=true` を設定し、HTTPSの背後で動かす。
 `QE_VIEW_TOKEN_SECRET` には、デプロイごとに生成した十分長い秘密値を設定する。
+ワーカーは既定で `~/.venvs/qe-tools-v1` をQE用のPython環境として使う。別の場所を使う場合は `QE_TOOLS_VENV` に指定する。
 
 ## 注意
 

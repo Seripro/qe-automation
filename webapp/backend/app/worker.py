@@ -18,6 +18,7 @@ class Worker:
 
     def run_forever(self) -> None:
         self.store.initialize()
+        self.ensure_qe_tools_environment()
         print("QE worker started; waiting for queued jobs.", flush=True)
         while True:
             job = self.store.claim_next()
@@ -54,6 +55,7 @@ class Worker:
         cwd.mkdir(parents=True, exist_ok=True)
         log_path = Path(job["work_dir"]).parent / "worker.log"
         environment = os.environ.copy()
+        environment["PATH"] = f"{self.settings.qe_tools_venv / 'bin'}:{environment['PATH']}"
         if extra_env:
             environment.update(extra_env)
         with log_path.open("a", encoding="utf-8") as log:
@@ -73,6 +75,18 @@ class Worker:
             if process.returncode != 0:
                 detail = self.log_tail(log_path)
                 raise RuntimeError(f"{state} exited with status {process.returncode}: {detail}")
+
+    def ensure_qe_tools_environment(self) -> None:
+        python = self.settings.qe_tools_venv / "bin" / "python3"
+        if not python.is_file():
+            raise RuntimeError(f"QE tools virtual environment was not found: {self.settings.qe_tools_venv}")
+        result = subprocess.run(
+            [str(python), "-c", "import matplotlib, numpy, seekpath"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"QE tools dependencies are unavailable: {result.stderr.strip()}")
 
     @staticmethod
     def log_tail(log_path: Path, limit: int = 1_000) -> str:
