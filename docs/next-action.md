@@ -1,6 +1,6 @@
 # 次回の作業
 
-- 更新日: 2026-11-19
+- 更新日: 2026-11-21
 - 状態: 進行中
 - 参照タイミング: 研究作業を始めるときに、`AGENTS.md` の後で読む。
 
@@ -14,10 +14,10 @@
 
 ## 次の具体的な作業
 
-### 0. 一コマンドCLIの設計・実装
+### 0. 一コマンドCLIの検証完了
 
 - 採用方針は [ADR-0004](decisions/0004-stage-cli-workflow-before-pbs.md) を正とする。
-- `~/qe-inputs/<material-label>/PWscf.zip` を入力配置規約とし、SCF → バンド → PDOSを一回のコマンドで順次実行する。
+- `~/qe-inputs/<material-label>/PWscf.zip` を入力配置規約とし、MgB₂で `make run MATERIAL=MgB2` によるSCF → バンド → PDOSの一回実行を確認した。
 - 初期は直接実行を使うが、CLIの利用方法と処理状態をPBS固有の情報に依存させず、後でPBS実行器を追加する。
 
 ### 1. CLI計算フローをGUI実装の処理単位へ整理する
