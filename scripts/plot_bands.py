@@ -31,6 +31,29 @@ def read_bands(path: Path) -> list[list[tuple[float, float]]]:
     return bands
 
 
+def split_discontinuous_path(band: list[tuple[float, float]]) -> list[list[tuple[float, float]]]:
+    """Split a band where bands.x repeats or resets the path distance.
+
+    A ``crystal_b`` path can contain disconnected high-symmetry segments. QE
+    assigns the same cumulative distance to the end of one segment and the
+    start of the next. Plotting them as one polyline incorrectly creates a
+    vertical line between different k-points.
+    """
+    if not band:
+        return []
+
+    segments: list[list[tuple[float, float]]] = [[band[0]]]
+    previous_x = band[0][0]
+    for point in band[1:]:
+        x_value = point[0]
+        if x_value <= previous_x:
+            segments.append([point])
+        else:
+            segments[-1].append(point)
+        previous_x = x_value
+    return segments
+
+
 def read_kpath(path: Path) -> list[tuple[str, int]]:
     """kp.pwscf のコメントから高対称点ラベルと区間点数を読み取る。"""
     lines = path.read_text().splitlines()
@@ -91,8 +114,9 @@ def main() -> None:
     bands = read_bands(args.input)
     figure, axis = plt.subplots(figsize=(8, 6), constrained_layout=True)
     for band in bands:
-        x_values, energies = zip(*band)
-        axis.plot(x_values, [energy - args.fermi for energy in energies], color="tab:blue", linewidth=0.8)
+        for segment in split_discontinuous_path(band):
+            x_values, energies = zip(*segment)
+            axis.plot(x_values, [energy - args.fermi for energy in energies], color="tab:blue", linewidth=0.8)
 
     axis.axhline(0.0, color="black", linestyle="--", linewidth=0.8, label="Fermi level")
     if args.kpath:
