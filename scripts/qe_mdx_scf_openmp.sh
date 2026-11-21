@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# mdx-server 上でシリコンの基準入力を用いて SCF を直接実行するスクリプト。
+# mdx-server 上で検証済みPWscf.zipを用いてSCFを直接実行するスクリプト。
 # scripts/qe1.sh の「入力準備 → SCF → 出力確認」を、PBS/MPI を使わない
 # OpenMP 実行用に移植したもの。既存の qe1.sh, qe2.sh は変更しない。
 
@@ -39,6 +39,15 @@ QE_SOURCE_REVISION="$(git -C "${QE_SOURCE_DIR}" describe --tags --always --dirty
 
 if ! command -v unzip >/dev/null 2>&1; then
     echo "Error: unzip command was not found. Install the 'unzip' package first." >&2
+    exit 2
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Error: python3 command was not found; it is required to validate the ZIP archive." >&2
+    exit 2
+fi
+
+if ! python3 "${SCRIPT_DIR}/validate_qe_zip.py" "${ZIP_FILE}"; then
     exit 2
 fi
 
