@@ -18,9 +18,11 @@ class Worker:
 
     def run_forever(self) -> None:
         self.store.initialize()
+        print("QE worker started; waiting for queued jobs.", flush=True)
         while True:
             job = self.store.claim_next()
             if job:
+                print(f"Claimed job {job['id']}.", flush=True)
                 self.run_job(job)
             else:
                 time.sleep(1)
@@ -37,6 +39,7 @@ class Worker:
             if not all(path.is_file() for path in required):
                 raise RuntimeError("Expected result images were not generated")
             self.store.transition(job["id"], "COMPLETED")
+            print(f"Job {job['id']} completed.", flush=True)
         except TimeoutError as error:
             self.store.transition(job["id"], "TIMED_OUT", reason=str(error))
         except Exception as error:
@@ -44,6 +47,7 @@ class Worker:
                 self.store.transition(job["id"], "CANCELLED", reason=str(error))
             else:
                 self.store.transition(job["id"], "FAILED", reason=str(error))
+            print(f"Job {job['id']} stopped: {error}", flush=True)
 
     def run_command(self, job: dict, state: str, command: list[str], cwd: Path, extra_env: dict[str, str] | None = None) -> None:
         self.store.transition(job["id"], state)
@@ -67,7 +71,13 @@ class Worker:
                     raise TimeoutError(f"{state} exceeded its time limit")
                 time.sleep(1)
             if process.returncode != 0:
-                raise RuntimeError(f"{state} exited with status {process.returncode}")
+                detail = self.log_tail(log_path)
+                raise RuntimeError(f"{state} exited with status {process.returncode}: {detail}")
+
+    @staticmethod
+    def log_tail(log_path: Path, limit: int = 1_000) -> str:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+        return text[-limit:].strip().replace("\n", " ")
 
     @staticmethod
     def stop_process(process: subprocess.Popen) -> None:
