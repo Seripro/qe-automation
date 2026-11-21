@@ -1,1 +1,5 @@
 memo.txt
+webapp/runtime/
+webapp/backend/.venv/
+__pycache__/
+*.py[cod]
