@@ -13,6 +13,8 @@ if [[ $# -ne 1 ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=qe_input_utils.sh
+source "${SCRIPT_DIR}/qe_input_utils.sh"
 SCF_RUN_DIR="$1"
 CALC_DIR="${SCF_RUN_DIR}/PWscf"
 QE_BIN_DIR="${QE_BIN_DIR:-${HOME}/program/q-e-7.6/bin}"
@@ -31,8 +33,14 @@ if ! grep -q "JOB DONE" "${CALC_DIR}/scf.out"; then
     exit 2
 fi
 
-if [[ ! -d "${CALC_DIR}/out/aiida.save" ]]; then
-    echo "Error: SCF restart data was not found: ${CALC_DIR}/out/aiida.save" >&2
+QE_PREFIX="$(qe_control_value "${CALC_DIR}/pwscf.in" prefix)"
+QE_PREFIX="${QE_PREFIX:-aiida}"
+QE_OUTDIR="$(qe_control_value "${CALC_DIR}/pwscf.in" outdir)"
+QE_OUTDIR="${QE_OUTDIR:-./out/}"
+SAVE_DIR="$(qe_outdir_path "${CALC_DIR}" "${QE_OUTDIR}")/${QE_PREFIX}.save"
+
+if [[ ! -d "${SAVE_DIR}" ]]; then
+    echo "Error: SCF restart data was not found: ${SAVE_DIR}" >&2
     exit 2
 fi
 
@@ -89,11 +97,14 @@ echo "OpenMP threads: ${OMP_NUM_THREADS}"
 echo "Kohn-Sham states: ${KOHN_SHAM_STATES}"
 echo "Using nbnd: ${NBND}"
 echo "Fermi energy: ${FERMI_ENERGY} eV"
+echo "QE prefix: ${QE_PREFIX}"
+echo "QE outdir: ${QE_OUTDIR}"
 echo "K-point path points per segment: ${KPATH_POINTS}"
 
 cd "${CALC_DIR}"
 cp pwscf.in band.in
 sed -i "s/^[[:space:]]*calculation[[:space:]]*=.*/  calculation = 'bands'/" band.in
+sed -i "/^[[:space:]]*nbnd[[:space:]]*=/d" band.in
 sed -i "/^[[:space:]]*&SYSTEM/a\\  nbnd = ${NBND}" band.in
 sed -i '/^[[:space:]]*K_POINTS[[:space:]]\+automatic/,+1d' band.in
 
@@ -101,10 +112,10 @@ echo "Generating the high-symmetry k-point path with SeeK-path..."
 python3 "${SCRIPT_DIR}/generate_kpath.py" pwscf.in "${KPATH_POINTS}"
 cat kp.pwscf >> band.in
 
-cat > band_plot.in <<'EOF'
+cat > band_plot.in <<EOF
 &BANDS
-  outdir = "./out/"
-  prefix = "aiida"
+  outdir = "${QE_OUTDIR}"
+  prefix = "${QE_PREFIX}"
 /
 EOF
 

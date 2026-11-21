@@ -8,6 +8,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPOSITORY_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=qe_input_utils.sh
+source "${SCRIPT_DIR}/qe_input_utils.sh"
 
 # 引数または環境変数で上書きできる。デフォルトはリポジトリ内の基準入力。
 ZIP_FILE="${1:-${ZIP_FILE:-${REPOSITORY_ROOT}/docs/experiments/silicon/input/PWscf.zip}}"
@@ -65,10 +67,27 @@ if [[ ! -f "${CALC_DIR}/pwscf.in" ]]; then
     exit 2
 fi
 
-if [[ ! -f "${CALC_DIR}/pseudo/Si.pbesol-n-rrkjus_psl.1.0.0.UPF" ]]; then
-    echo "Error: expected Si pseudopotential was not found after extracting the ZIP." >&2
+QE_PREFIX="$(qe_control_value "${CALC_DIR}/pwscf.in" prefix)"
+QE_PREFIX="${QE_PREFIX:-aiida}"
+QE_OUTDIR="$(qe_control_value "${CALC_DIR}/pwscf.in" outdir)"
+QE_OUTDIR="${QE_OUTDIR:-./out/}"
+QE_PSEUDO_DIR="$(qe_control_value "${CALC_DIR}/pwscf.in" pseudo_dir)"
+QE_PSEUDO_DIR="${QE_PSEUDO_DIR:-./pseudo/}"
+PSEUDO_DIR_PATH="$(qe_outdir_path "${CALC_DIR}" "${QE_PSEUDO_DIR}")"
+SAVE_DIR="$(qe_outdir_path "${CALC_DIR}" "${QE_OUTDIR}")/${QE_PREFIX}.save"
+
+mapfile -t PSEUDOPOTENTIAL_FILES < <(qe_pseudopotential_files "${CALC_DIR}/pwscf.in")
+if (( ${#PSEUDOPOTENTIAL_FILES[@]} == 0 )); then
+    echo "Error: no pseudopotentials were found in the ATOMIC_SPECIES card." >&2
     exit 2
 fi
+
+for pseudopotential in "${PSEUDOPOTENTIAL_FILES[@]}"; do
+    if [[ ! -f "${PSEUDO_DIR_PATH}/${pseudopotential}" ]]; then
+        echo "Error: pseudopotential listed in pwscf.in was not found: ${PSEUDO_DIR_PATH}/${pseudopotential}" >&2
+        exit 2
+    fi
+done
 
 {
     echo "run_name=${RUN_NAME}"
@@ -77,6 +96,9 @@ fi
     echo "hostname=$(hostname)"
     echo "input_zip_sha256=$(sha256sum "${WORK_DIR}/PWscf.zip" | awk '{print $1}')"
     echo "qe_executable=${QE_BIN_DIR}/pw.x"
+    echo "qe_prefix=${QE_PREFIX}"
+    echo "qe_outdir=${QE_OUTDIR}"
+    echo "qe_pseudo_dir=${QE_PSEUDO_DIR}"
     echo "qe_source_revision=${QE_SOURCE_REVISION}"
     echo "omp_num_threads=${OMP_NUM_THREADS}"
 } > "${WORK_DIR}/run-metadata.txt"
@@ -97,8 +119,8 @@ if ! grep -q "JOB DONE" scf.out; then
     exit 1
 fi
 
-if [[ ! -d out/aiida.save ]]; then
-    echo "Error: SCF output directory out/aiida.save was not created." >&2
+if [[ ! -d "${SAVE_DIR}" ]]; then
+    echo "Error: SCF restart data was not created: ${SAVE_DIR}" >&2
     exit 1
 fi
 
