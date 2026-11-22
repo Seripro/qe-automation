@@ -19,6 +19,7 @@ class Worker:
     def run_forever(self) -> None:
         self.store.initialize()
         self.ensure_qe_tools_environment()
+        self.recover_interrupted_jobs()
         print("QE worker started; waiting for queued jobs.", flush=True)
         while True:
             job = self.store.claim_next()
@@ -27,6 +28,22 @@ class Worker:
                 self.run_job(job)
             else:
                 time.sleep(1)
+
+    def recover_interrupted_jobs(self) -> None:
+        """Fail work that cannot safely be resumed after a worker restart.
+
+        QE stages are not resumed automatically: a stopped worker cannot know
+        whether the last external command wrote a complete, usable result.
+        If its recorded process group is still recognizably inside the job
+        directory, terminate it before exposing the job as failed.
+        """
+        for job in self.store.interrupted_jobs():
+            process_stopped = self.stop_orphaned_process(job)
+            reason = "Worker restarted while this job was running. Please submit it again."
+            if process_stopped:
+                reason += " The interrupted QE process was stopped."
+            self.store.transition(job["id"], "FAILED", reason=reason)
+            print(f"Recovered interrupted job {job['id']} as FAILED.", flush=True)
 
     def run_job(self, job: dict) -> None:
         work_dir = Path(job["work_dir"])
@@ -102,6 +119,32 @@ class Worker:
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGKILL)
             process.wait(timeout=10)
+
+    @staticmethod
+    def stop_orphaned_process(job: dict) -> bool:
+        """Stop a recorded job process group only after a Linux cwd check."""
+        pgid = job.get("process_group_id")
+        if not isinstance(pgid, int) or pgid <= 0:
+            return False
+
+        process_cwd = Path(f"/proc/{pgid}/cwd")
+        allowed_directories = {Path(job["work_dir"]).resolve(), Path(job["work_dir"]).parent.resolve()}
+        try:
+            cwd = process_cwd.resolve(strict=True)
+        except OSError:
+            return False
+        if cwd not in allowed_directories:
+            return False
+
+        try:
+            os.killpg(pgid, signal.SIGTERM)
+        except ProcessLookupError:
+            return False
+        try:
+            os.killpg(pgid, 0)
+        except ProcessLookupError:
+            return True
+        return True
 
 
 def main() -> None:

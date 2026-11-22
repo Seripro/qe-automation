@@ -82,6 +82,16 @@ class JobStore:
             claimed = db.execute("SELECT * FROM jobs WHERE id = ?", (row["id"],)).fetchone()
         return dict(claimed)
 
+    def interrupted_jobs(self) -> list[dict]:
+        """Return jobs left in an in-progress state by a stopped worker."""
+        placeholders = ",".join("?" for _ in RUNNING_STATES)
+        with self.connection() as db:
+            rows = db.execute(
+                f"SELECT * FROM jobs WHERE state IN ({placeholders}) ORDER BY created_at",
+                tuple(sorted(RUNNING_STATES)),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def transition(self, job_id: str, state: str, *, reason: str | None = None,
                    pid: int | None = None, pgid: int | None = None, exit_code: int | None = None) -> None:
         if state not in {"QUEUED", *RUNNING_STATES, *TERMINAL_STATES}:
