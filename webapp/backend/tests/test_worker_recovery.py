@@ -8,6 +8,29 @@ from app.worker import Worker
 
 
 class WorkerRecoveryTests(unittest.TestCase):
+    def test_only_one_worker_can_hold_the_runtime_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            settings = Settings(
+                repository_root=root,
+                data_root=root / "runtime",
+                max_upload_bytes=1,
+                cookie_secure=False,
+                stage_timeout_seconds=1,
+                view_token_secret="test",
+                qe_tools_venv=root,
+            )
+            first = Worker(settings)
+            second = Worker(settings)
+            first.acquire_worker_lock()
+            try:
+                with self.assertRaises(RuntimeError):
+                    second.acquire_worker_lock()
+            finally:
+                first.release_worker_lock()
+            second.acquire_worker_lock()
+            second.release_worker_lock()
+
     def test_running_job_is_failed_and_queued_job_is_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

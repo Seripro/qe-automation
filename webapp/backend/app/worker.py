@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import os
 import signal
 import subprocess
@@ -15,19 +16,43 @@ class Worker:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.store = JobStore(settings.database_path)
+        self.lock_file = None
 
     def run_forever(self) -> None:
-        self.store.initialize()
-        self.ensure_qe_tools_environment()
-        self.recover_interrupted_jobs()
-        print("QE worker started; waiting for queued jobs.", flush=True)
-        while True:
-            job = self.store.claim_next()
-            if job:
-                print(f"Claimed job {job['id']}.", flush=True)
-                self.run_job(job)
-            else:
-                time.sleep(1)
+        self.acquire_worker_lock()
+        try:
+            self.store.initialize()
+            self.ensure_qe_tools_environment()
+            self.recover_interrupted_jobs()
+            print("QE worker started; waiting for queued jobs.", flush=True)
+            while True:
+                job = self.store.claim_next()
+                if job:
+                    print(f"Claimed job {job['id']}.", flush=True)
+                    self.run_job(job)
+                else:
+                    time.sleep(1)
+        finally:
+            self.release_worker_lock()
+
+    def acquire_worker_lock(self) -> None:
+        """Allow exactly one direct-execution worker per runtime directory."""
+        self.settings.data_root.mkdir(parents=True, exist_ok=True)
+        lock_path = self.settings.data_root / "worker.lock"
+        lock_file = lock_path.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            lock_file.close()
+            raise RuntimeError(f"Another QE worker already holds {lock_path}")
+        self.lock_file = lock_file
+
+    def release_worker_lock(self) -> None:
+        if self.lock_file is None:
+            return
+        fcntl.flock(self.lock_file.fileno(), fcntl.LOCK_UN)
+        self.lock_file.close()
+        self.lock_file = None
 
     def recover_interrupted_jobs(self) -> None:
         """Fail work that cannot safely be resumed after a worker restart.
@@ -154,9 +179,14 @@ def main() -> None:
     worker = Worker(load_settings())
     worker.store.initialize()
     if args.once:
-        job = worker.store.claim_next()
-        if job:
-            worker.run_job(job)
+        worker.acquire_worker_lock()
+        try:
+            worker.recover_interrupted_jobs()
+            job = worker.store.claim_next()
+            if job:
+                worker.run_job(job)
+        finally:
+            worker.release_worker_lock()
     else:
         worker.run_forever()
 
