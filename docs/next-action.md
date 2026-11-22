@@ -6,11 +6,13 @@
 
 ## 現在地
 
-- フェーズ: CLI計算フロー検証（SiとMgB₂でSCF・バンド・PDOS完了）
+- フェーズ: MVPの中核実装・運用検証を完了。対応物質の検証と公開前準備へ移行。
 - 基準入力: `docs/experiments/silicon/input/PWscf.zip`
 - 入力方針: 初回の SCF → バンド構造 → NSCF/PDOS 計算では、基準入力ZIPを変更しない（[ADR-0003](decisions/0003-use-materials-cloud-zip-as-silicon-baseline.md)）。
 - 直近の確認: NSCF・PDOS計算が正常終了し、全DOS・Si s/p成分の `pdos.png` を得た。詳細は [2026-11-19-pdos.md](experiments/silicon/2026-11-19-pdos.md)。
 - 複数元素の確認: MgB₂でもSCF・バンド・NSCF・PDOSが正常終了し、Mg・BのPDOSを含む図を得た。詳細は [2026-11-21-band-pdos.md](experiments/mgb2/2026-11-21-band-pdos.md)。物理的妥当性は未検証。
+- Web UIの通常系: SiとMgB₂で、ブラウザからのZIP登録 → 待ち行列 → SCF → Band → NSCF/PDOS → 図の表示までを確認した。
+- 運用系: 不正ZIPの拒否、キャンセル、段階ごとのタイムアウト、サービス再起動後の履歴復元、ワーカー異常停止後の中断処理と待機ジョブの継続を確認した。
 
 ## 次の具体的な作業
 
@@ -36,6 +38,8 @@ SQLiteのジョブDB、匿名ブラウザCookie、アップロードAPI、直接
 - NaではSCF成功後、Band計算中にQEの`cdiaghg: S matrix not positive definite`で停止した。
 - GUI固有の障害ではなく、自動生成した`band.in`を含むQE計算条件の問題として扱う。
 - 詳細と切り分け案は[Naのバンド計算における対角化エラー](experiments/sodium/2026-11-22-band-diagonalization-error.md)を参照する。
+
+この課題は、進捗報告後に再開する。現時点でアプリ側に全物質共通の自動回避策は加えない。
 
 ## その後の予定
 
