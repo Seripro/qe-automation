@@ -3,3 +3,8 @@ webapp/runtime/
 webapp/backend/.venv/
 __pycache__/
 *.py[cod]
+webapp/frontend/node_modules/
+webapp/frontend/dist/
+*.tsbuildinfo
+webapp/frontend/vite.config.js
+webapp/frontend/vite.config.d.ts

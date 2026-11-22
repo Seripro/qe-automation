@@ -7,6 +7,7 @@ import secrets
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -16,6 +17,14 @@ from .database import JobStore, TERMINAL_STATES
 settings = load_settings()
 store = JobStore(settings.database_path)
 app = FastAPI(title="QE Calculator API")
+allowed_origins = [origin for origin in __import__("os").environ.get("QE_CORS_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173").split(",") if origin]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type"],
+)
 
 
 class JobResponse(BaseModel):
