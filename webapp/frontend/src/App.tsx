@@ -35,7 +35,7 @@ export default function App() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!file) { setMessage("PWscf.zip を選択してください。"); return; }
-    setSubmitting(true); setMessage("");
+    setSubmitting(true); setMessage(""); setLog("");
     try {
       const job = await createJob(material, file);
       setJobs((current) => [job, ...current]); setSelectedId(job.id); setMaterial(""); setFile(null);
@@ -65,7 +65,7 @@ export default function App() {
         <h2>自分のジョブ</h2>
         <div className="jobs" aria-live="polite">
           {jobs.length === 0 && <p className="muted">まだジョブはありません。</p>}
-          {jobs.map((job) => <button className={`job ${selectedId === job.id ? "selected" : ""}`} key={job.id} onClick={() => { setSelectedId(job.id); setLog(""); }}>
+          {jobs.map((job) => <button className={`job ${selectedId === job.id ? "selected" : ""}`} key={job.id} onClick={() => { setSelectedId(job.id); setLog(""); setMessage(""); }}>
             <span><strong>{job.material_label}</strong><small>{formatTime(job.created_at)}</small></span>
             <span className={`state ${job.state.toLowerCase()}`}>{labels[job.state]}</span>
           </button>)}
