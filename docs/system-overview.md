@@ -2,7 +2,10 @@
 
 この文書は、進捗報告で「ブラウザからQEをどう動かしているか」と聞かれたときに説明するための資料である。
 
-- 構成図: [qe-webapp-architecture.html](architecture/qe-webapp-architecture.html)
+- 構成図（発表用・1920×1080 PNG）: [qe-webapp-architecture-presentation.png](architecture/qe-webapp-architecture-presentation.png)
+- 編集用HTML: [qe-webapp-architecture-presentation.html](architecture/qe-webapp-architecture-presentation.html)
+- 英語版（大文字・1920×1080 PNG）: [qe-webapp-architecture-presentation-en.png](architecture/qe-webapp-architecture-presentation-en.png)
+- 英語版の編集用HTML: [qe-webapp-architecture-presentation-en.html](architecture/qe-webapp-architecture-presentation-en.html)
 - 採用判断: [ADR-0005](decisions/0005-use-application-queue-on-mdx.md)、[ADR-0006](decisions/0006-use-anonymous-browser-sessions-for-mvp.md)、[ADR-0007](decisions/0007-fail-interrupted-jobs-after-worker-restart.md)
 
 ## 一文でいうと
